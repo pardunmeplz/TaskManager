@@ -13,9 +13,17 @@ public class TaskController {
     @Autowired
     TaskService taskService;
 
-    @GetMapping
+    @GetMapping("/all")
     public List<Task> getAllTasks(){
         return taskService.getAllTasks();
+    }
+
+    @GetMapping
+    public List<Task> getTasks(@RequestParam(defaultValue = "0") int page,
+                               @RequestParam(defaultValue = "20") int size,
+                               @RequestParam(defaultValue = "id") String sort,
+                               @RequestParam(defaultValue = "true") boolean asc){
+        return taskService.getTasks(sort, asc, size, page);
     }
 
     @GetMapping("/{id}")
@@ -42,6 +50,11 @@ public class TaskController {
     @PutMapping
     public Task updateTask(@RequestBody Task task){
         return taskService.updateTask(task);
+    }
+
+    @PutMapping("/status/{id}")
+    public Task updateStatus(@RequestBody String status, @PathVariable int id){
+        return taskService.updateStatus(id,status);
     }
 
 }
