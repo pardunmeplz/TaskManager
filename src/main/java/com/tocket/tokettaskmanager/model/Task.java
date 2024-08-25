@@ -2,6 +2,8 @@ package com.tocket.tokettaskmanager.model;
 
 import jakarta.validation.constraints.NotBlank;
 
+import java.time.LocalDate;
+
 public class Task {
     private int id;
     @NotBlank(message = "Title is empty")
@@ -9,6 +11,7 @@ public class Task {
     private String description;
     @NotBlank(message = "Status is empty")
     private String status;
+    private LocalDate dueDate;
 
     public void setId(int newId){
         id = newId;
@@ -16,6 +19,14 @@ public class Task {
 
     public int getId(){
         return id;
+    }
+
+    public LocalDate getDueDate(){
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate newDueDate){
+        dueDate = newDueDate;
     }
 
     public void setTitle(String newTitle){
@@ -47,5 +58,6 @@ public class Task {
         title = newTask.getTitle();
         description = newTask.getDescription();
         status = newTask.getStatus();
+        dueDate = newTask.getDueDate();
     }
 }

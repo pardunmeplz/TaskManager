@@ -3,10 +3,8 @@ package com.tocket.tokettaskmanager.service;
 import com.tocket.tokettaskmanager.model.Task;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.time.LocalDate;
 
 
 @Service
@@ -25,11 +23,15 @@ public class TaskService {
                         switch (sort.toLowerCase()) {
                             case "title" -> Comparator.comparing(Task::getTitle);
                             case "status" ->Comparator.comparing(Task::getStatus);
+                            case "duedate"->Comparator.comparing(Task::getDueDate,
+                                    Comparator.nullsLast(Comparator.naturalOrder()));
                             default ->Comparator.comparingInt(Task::getId);
                         }
                         :switch (sort.toLowerCase()) {
                             case "title" -> Comparator.comparing(Task::getTitle).reversed();
                             case "status" ->Comparator.comparing(Task::getStatus).reversed();
+                            case "duedate"->Comparator.comparing(Task::getDueDate,
+                                    Comparator.nullsLast(Comparator.naturalOrder())).reversed();
                             default ->Comparator.comparingInt(Task::getId).reversed();
                         }
         ).toList();
@@ -42,8 +44,11 @@ public class TaskService {
         return tasks.stream().filter(n -> n.getId() == id).findFirst().orElse(null);
     }
 
-    public List<Task> getFilteredTasks(String[] statuses, String title){
-        return tasks.stream().filter(n-> Arrays.asList(statuses).contains(n.getStatus()) && (title == null || n.getTitle().contains(title))).toList();
+    public List<Task> getFilteredTasks(String[] statuses, String title, LocalDate dueDate){
+        return tasks.stream().filter(n-> Arrays.asList(statuses).contains(n.getStatus())
+                && (title == null || n.getTitle().contains(title))
+                && (dueDate ==null || (n.getDueDate() != null && n.getDueDate().equals(dueDate)))
+        ).toList();
     }
 
     public Task updateTask(Task task){

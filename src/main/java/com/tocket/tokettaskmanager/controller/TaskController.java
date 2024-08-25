@@ -4,6 +4,8 @@ import com.tocket.tokettaskmanager.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -32,9 +34,16 @@ public class TaskController {
     }
 
     @GetMapping("/search")
-    public List<Task> searchTasks(@RequestParam(required = false) String title, @RequestParam(required = false) String status){
+    public List<Task> searchTasks(@RequestParam(required = false) String title,
+                                  @RequestParam(required = false) String status,
+                                  @RequestParam(required = false) LocalDate dueDate){
         final String[] blankArray  = {};
-        return taskService.getFilteredTasks( status == null?blankArray:status.split(","),title);
+        return taskService.getFilteredTasks(
+                status == null?
+                        blankArray
+                        :status.split(","),
+                title,dueDate
+                );
     }
 
     @PostMapping
