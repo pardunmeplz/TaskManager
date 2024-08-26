@@ -1,11 +1,15 @@
 package com.tocket.tokettaskmanager.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 
+@Entity
 public class Task {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     @NotBlank(message = "Title is empty")
     private String title;
     private String description;
@@ -17,7 +21,7 @@ public class Task {
         id = newId;
     }
 
-    public int getId(){
+    public long getId(){
         return id;
     }
 

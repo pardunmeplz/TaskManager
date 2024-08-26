@@ -1,6 +1,8 @@
 package com.tocket.tokettaskmanager.service;
 
 import com.tocket.tokettaskmanager.model.Task;
+import com.tocket.tokettaskmanager.repository.TaskRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -9,30 +11,34 @@ import java.time.LocalDate;
 
 @Service
 public class TaskService {
-    private final List<Task> tasks = new ArrayList<>();
-    private int idCounter =1;
+    private final TaskRepository taskRepository;
+
+    @Autowired
+    public TaskService(TaskRepository taskRepository){
+        this.taskRepository = taskRepository;
+    }
 
     public List<Task> getAllTasks(){
-        return tasks;
+        return taskRepository.findAll();
     }
 
     public List<Task> getTasks(String sort, boolean asc, int size, int page){
         // sort
-        List<Task> sorted = tasks.stream().sorted(
+        List<Task> sorted = taskRepository.findAll().stream().sorted(
                 asc?
                         switch (sort.toLowerCase()) {
                             case "title" -> Comparator.comparing(Task::getTitle);
                             case "status" ->Comparator.comparing(Task::getStatus);
                             case "duedate"->Comparator.comparing(Task::getDueDate,
                                     Comparator.nullsLast(Comparator.naturalOrder()));
-                            default ->Comparator.comparingInt(Task::getId);
+                            default ->Comparator.comparingLong(Task::getId);
                         }
                         :switch (sort.toLowerCase()) {
                             case "title" -> Comparator.comparing(Task::getTitle).reversed();
                             case "status" ->Comparator.comparing(Task::getStatus).reversed();
                             case "duedate"->Comparator.comparing(Task::getDueDate,
                                     Comparator.nullsLast(Comparator.naturalOrder())).reversed();
-                            default ->Comparator.comparingInt(Task::getId).reversed();
+                            default ->Comparator.comparingLong(Task::getId).reversed();
                         }
         ).toList();
 
@@ -40,41 +46,48 @@ public class TaskService {
         return sorted.subList(Math.min(size*page,sorted.size()),Math.min(size*(page+1),sorted.size()));
     }
 
-    public Task getTask(int id){
-        return tasks.stream().filter(n -> n.getId() == id).findFirst().orElse(null);
+    public Optional<Task> getTask(long id){
+        return taskRepository.findById(id);
     }
 
     public List<Task> getFilteredTasks(String[] statuses, String title, LocalDate dueDate){
-        return tasks.stream().filter(n-> Arrays.asList(statuses).contains(n.getStatus())
+        return taskRepository.findAll().stream().filter(n-> Arrays.asList(statuses).contains(n.getStatus())
                 && (title == null || n.getTitle().contains(title))
                 && (dueDate ==null || (n.getDueDate() != null && n.getDueDate().equals(dueDate)))
         ).toList();
     }
 
     public Task updateTask(Task task){
-        final Task currTask = tasks.stream().filter(n -> n.getId() == task.getId()).findFirst().orElse(null);
-        if(currTask == null) throw new IllegalArgumentException("No task with given Id " + task.getId());
+        final Optional<Task> currTask = taskRepository.findById(task.getId());
+        if(currTask.isEmpty()) throw new IllegalArgumentException("No task with given Id " + task.getId());
         if(task.getTitle().isBlank() || task.getStatus().isBlank()) throw new IllegalArgumentException("Title and Status are required!");
-        currTask.setTask(task);
+        taskRepository.save(task);
+
         return task;
     }
 
-    public Task updateStatus(int id, String status){
-        final Task currTask = tasks.stream().filter(i->i.getId() == id).findFirst().orElse(null);
-        if(currTask == null) throw new IllegalArgumentException("No task with given Id " + id);
-        if(status.isBlank()) throw new IllegalArgumentException("Status is required!");
-        currTask.setStatus(status);
+    public Optional<Task> updateStatus(long id, String status){
+        final Optional<Task> currTask = taskRepository.findById(id);
+        if(currTask.isEmpty()) {
+                throw new IllegalArgumentException("No task with given Id " + id);
+            }
+        if(status.isBlank()) {
+            throw new IllegalArgumentException("Status is required!");
+        }
+        currTask.ifPresent((task)->{
+            task.setStatus(status);
+            taskRepository.save(task);
+        });
         return currTask;
     }
 
-    public void removeTask(int id){
-        tasks.removeIf(n->n.getId() == id);
+    public void removeTask(long id){
+        taskRepository.deleteById(id);
     }
 
     public Task newTask(Task task) {
         if(task.getTitle().isBlank() || task.getStatus().isBlank()) throw new IllegalArgumentException("Title and Status are required!");
-        task.setId(idCounter++);
-        tasks.add(task);
+        taskRepository.save(task);
         return task;
     }
 }

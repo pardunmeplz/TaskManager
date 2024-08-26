@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("tasks")
@@ -29,7 +30,7 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public Task getTask(@PathVariable int id){
+    public Optional<Task> getTask(@PathVariable int id){
         return taskService.getTask(id);
     }
 
@@ -56,13 +57,8 @@ public class TaskController {
         taskService.removeTask(id);
     }
 
-    @PutMapping
-    public Task updateTask(@RequestBody Task task){
-        return taskService.updateTask(task);
-    }
-
     @PutMapping("/status/{id}")
-    public Task updateStatus(@RequestBody String status, @PathVariable int id){
+    public Optional<Task> updateStatus(@RequestBody String status, @PathVariable int id){
         return taskService.updateStatus(id,status);
     }
 
