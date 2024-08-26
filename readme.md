@@ -15,6 +15,5 @@ Simple task management application APi built on spring boot
 - GET /tasks (get tasks based on sort and pagination)
 - GET /tasks/{id} (get a task based on Id)
 - POST /tasks (add new tasks)
-- PUT /tasks/{id} (replace task with another)
 - PUT /tasks/status/{id) (update task status)
 - DELETE /tasks/{id} (Remove task based on Id)
